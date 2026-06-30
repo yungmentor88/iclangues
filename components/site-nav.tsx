@@ -63,11 +63,11 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
       <div className="container flex items-center justify-between gap-5">
         <Link href="/" className="flex items-center" aria-label="IClangues home">
           <Image
-            src="/images/logo.png"
+            src={onHero ? "/images/logo-dark.jpg" : "/images/logo.png"}
             alt="IClangues"
             width={140}
             height={40}
-            className={cn("h-10 w-auto transition-all duration-300", onHero && "brightness-0 invert")}
+            className={cn("h-10 w-auto transition-all duration-300", onHero && "mix-blend-screen")}
             priority
           />
         </Link>

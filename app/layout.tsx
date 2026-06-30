@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import { getUser } from "@/lib/supabase/server";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap" });
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${jakarta.variable} ${bricolage.variable}`}>
       <body className="font-sans">
+        <SmoothScroll />
         <SiteNav userEmail={user?.email ?? null} />
         {children}
         <SiteFooter />

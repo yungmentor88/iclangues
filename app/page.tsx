@@ -5,35 +5,98 @@ import { Hero } from "@/components/hero";
 import { Reveal } from "@/components/reveal";
 import { Faq } from "@/components/faq";
 import { FeatureHighlight } from "@/components/ui/feature-highlight";
+import { ZoomParallax } from "@/components/ui/zoom-parallax";
 import { Button } from "@/components/ui/button";
 import { LANGUAGES, FAQ, type LangCode } from "@/lib/content";
 
 const MARQUEE = ["Kriolu", "English", "Français", "Español", "Português", "Morabeza"];
 
+const STATS = [
+  { value: "1,200+", label: "Active learners" },
+  { value: "25+",    label: "Native teachers" },
+  { value: "5",      label: "Languages taught" },
+  { value: "A1–C2",  label: "All CEFR levels" },
+];
+
+const GALLERY = [
+  { src: "/images/hero.jpg",   alt: "Language learning in Cabo Verde" },
+  { src: "/images/market.jpg", alt: "The vibrant streets of Cabo Verde" },
+  { src: "/images/about.jpg",  alt: "IClangues classroom session" },
+  { src: "/images/beach.jpg",  alt: "Joy and community on the islands" },
+  { src: "/images/live.jpg",   alt: "A live lesson with a native teacher" },
+  { src: "/images/card1.jpg",  alt: "Students in conversation" },
+  { src: "/images/card2.jpg",  alt: "Cultural immersion" },
+];
+
 const SMART = [
-  { icon: Users, tone: "bg-primary/15 text-primary", tag: "Real voices", title: "Native speakers only", text: "Every teacher lives the language they teach." },
-  { icon: MessagesSquare, tone: "bg-red-50 text-brand-red", tag: "Conversation first", title: "Talk from day one", text: "Less theory, far more real speaking." },
-  { icon: GraduationCap, tone: "bg-amber-50 text-amber-600", tag: "Every level", title: "A1 to fluent", text: "From your first words to near-native, A1–C2." },
-  { icon: Globe2, tone: "bg-blue-50 text-brand-ocean", tag: "Anywhere", title: "Online & in-person", text: "Live on Zoom, or face-to-face in Cabo Verde." },
+  { icon: Users,          tone: "bg-primary/15 text-primary",      tag: "Real voices",         title: "Native speakers only",  text: "Every teacher lives the language they teach." },
+  { icon: MessagesSquare, tone: "bg-red-50 text-brand-red",        tag: "Conversation first",  title: "Talk from day one",     text: "Less theory, far more real speaking." },
+  { icon: GraduationCap, tone: "bg-amber-50 text-amber-600",       tag: "Every level",         title: "A1 to fluent",          text: "From your first words to near-native, A1–C2." },
+  { icon: Globe2,         tone: "bg-blue-50 text-brand-ocean",     tag: "Anywhere",            title: "Online & in-person",    text: "Live on Zoom, or face-to-face in Cabo Verde." },
 ];
 
 export default function HomePage() {
   return (
     <main>
+      {/* ── 1. Hero ── */}
       <Hero />
 
-      {/* Marquee */}
-      <div className="relative overflow-hidden border-y border-border bg-card py-4">
+      {/* ── 2. Stats bar ── */}
+      <section className="border-b border-border bg-card">
+        <div className="container grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
+          {STATS.map((s, i) => (
+            <Reveal key={s.label} delay={i * 0.07} className="flex flex-col items-center justify-center py-10 text-center">
+              <span className="font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{s.value}</span>
+              <span className="mt-1.5 text-sm font-medium text-muted-foreground">{s.label}</span>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 3. Culture gallery — ZoomParallax ── */}
+      <section>
+        <div className="container py-20 text-center sm:py-24">
+          <Reveal>
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+              <span className="h-2 w-2 rounded-full bg-primary" /> Cabo Verde · Culture · Language
+            </span>
+            <h2 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+              Feel the islands.<br />Speak the language.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+              Scroll through the world you&rsquo;re stepping into.
+            </p>
+          </Reveal>
+        </div>
+        <ZoomParallax images={GALLERY} />
+      </section>
+
+      {/* ── 4. Manifesto ── */}
+      <section className="container py-24 sm:py-32">
+        <Reveal className="mx-auto max-w-4xl text-center">
+          <p className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-[3.75rem]">
+            &ldquo;Language isn&rsquo;t just words.
+            <br />It&rsquo;s a people, a rhythm,
+            <br />a way of{" "}
+            <em className="not-italic text-primary">seeing the world.</em>&rdquo;
+          </p>
+          <div className="mx-auto mt-8 h-px w-12 bg-border" />
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">The IClangues way</p>
+        </Reveal>
+      </section>
+
+      {/* ── 5. Marquee ── */}
+      <div className="relative overflow-hidden border-y border-border bg-brand-ink py-4">
         <div className="flex w-max animate-marquee">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
-            <span key={i} className="flex items-center gap-6 px-6 font-display text-xl font-semibold">
+            <span key={i} className="flex items-center gap-6 px-6 font-display text-xl font-semibold text-white">
               {m} <Star className="h-3.5 w-3.5 fill-primary text-primary" />
             </span>
           ))}
         </div>
       </div>
 
-      {/* Simple & Smart Way */}
+      {/* ── 6. How it works ── */}
       <section className="container py-20 sm:py-28">
         <Reveal className="mx-auto mb-12 max-w-2xl text-center">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
@@ -60,7 +123,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Languages */}
+      {/* ── 7. Languages ── */}
       <section id="languages" className="bg-card py-20 sm:py-28">
         <div className="container">
           <Reveal className="mb-12 max-w-2xl">
@@ -92,7 +155,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Everything you need — feature-highlight (animated stagger) */}
+      {/* ── 8. Feature highlight ── */}
       <section className="container grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-2">
         <Reveal className="order-2 lg:order-1">
           <div className="relative aspect-[4/3.4] overflow-hidden rounded-[28px] shadow-2xl">
@@ -115,7 +178,7 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Learn live — dark card */}
+      {/* ── 9. Learn live — dark card ── */}
       <section className="container py-6 sm:py-10">
         <Reveal>
           <div className="grid items-center gap-8 overflow-hidden rounded-[32px] bg-brand-ink p-8 text-white sm:p-12 lg:grid-cols-2">
@@ -143,7 +206,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* Anytime anywhere — green card */}
+      {/* ── 10. Anytime anywhere — green card ── */}
       <section className="container py-12 sm:py-16">
         <Reveal>
           <div className="grid items-center gap-8 overflow-hidden rounded-[32px] bg-primary p-8 text-primary-foreground sm:p-12 lg:grid-cols-[1.1fr_0.9fr]">
@@ -176,7 +239,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* FAQ */}
+      {/* ── 11. FAQ ── */}
       <section className="container grid gap-10 py-20 sm:py-28 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal>
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
@@ -188,11 +251,12 @@ export default function HomePage() {
         <Reveal delay={0.1}><Faq items={FAQ} /></Reveal>
       </section>
 
-      {/* CTA */}
+      {/* ── 12. CTA ── */}
       <section className="container pb-24">
         <Reveal>
           <div className="relative overflow-hidden rounded-[32px] bg-brand-ink p-10 text-center text-white sm:p-16">
             <div className="pointer-events-none absolute -right-16 -top-32 h-80 w-80 rounded-full bg-primary/30 blur-3xl" />
+            <div className="pointer-events-none absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-brand-ocean/20 blur-3xl" />
             <h2 className="relative font-display text-4xl font-bold text-white sm:text-5xl">Ready to speak?</h2>
             <p className="relative mx-auto mt-4 max-w-xl text-white/80">
               Create a free account, take a 60-second placement test, or book a trial class with a native teacher.
