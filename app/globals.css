@@ -4,26 +4,35 @@
 
 @layer base {
   :root {
-    --background: 150 30% 99%;
-    --foreground: 162 35% 8%;
-    --card: 0 0% 100%;
-    --card-foreground: 162 35% 8%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 162 35% 8%;
-    --primary: 162 83% 42%;
+    /* ── Warm cream palette ── */
+    --background:       40 30% 97%;   /* #FAF9F6 — soft warm cream          */
+    --foreground:       215 28% 17%;  /* #1F2937 — rich near-black           */
+
+    --card:             38 40% 99%;   /* near-white with warmth              */
+    --card-foreground:  215 28% 17%;
+
+    --popover:          38 40% 99%;
+    --popover-foreground: 215 28% 17%;
+
+    --primary:          162 83% 42%;  /* brand green                         */
     --primary-foreground: 162 60% 7%;
-    --secondary: 150 30% 95%;
-    --secondary-foreground: 162 35% 12%;
-    --muted: 150 20% 96%;
-    --muted-foreground: 158 8% 42%;
-    --accent: 150 40% 94%;
-    --accent-foreground: 162 35% 12%;
-    --destructive: 6 84% 58%;
+
+    --secondary:        40 25% 93%;   /* warm light sand                     */
+    --secondary-foreground: 215 28% 17%;
+
+    --muted:            40 20% 93%;   /* warm muted bg                       */
+    --muted-foreground: 215 10% 45%;  /* warm medium gray                    */
+
+    --accent:           40 30% 91%;
+    --accent-foreground: 215 28% 17%;
+
+    --destructive:      6 84% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 150 14% 90%;
-    --input: 150 14% 90%;
-    --ring: 162 83% 42%;
-    --radius: 0.9rem;
+
+    --border:           35 18% 88%;   /* warm parchment border               */
+    --input:            35 18% 88%;
+    --ring:             162 83% 42%;
+    --radius:           0.9rem;
   }
 }
 
@@ -46,7 +55,6 @@
   }
 }
 
-/* Smooth anchor scrolling, respect reduced motion */
 html {
   scroll-behavior: smooth;
 }

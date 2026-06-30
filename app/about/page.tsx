@@ -38,7 +38,7 @@ export default function AboutPage() {
       <section className="container">
         <Reveal>
           <div className="relative aspect-[16/8] overflow-hidden rounded-[32px] shadow-2xl">
-            <Image src="/images/story.jpg" alt="An IClangues session — learning the way locals speak" fill className="object-cover object-center" sizes="100vw" priority />
+            <Image src="/images/story.jpg" alt="An IClangues session — learning the way locals speak" fill className="object-cover object-top" sizes="100vw" priority />
           </div>
         </Reveal>
       </section>
