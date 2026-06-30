@@ -34,10 +34,11 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Main story image */}
       <section className="container">
         <Reveal>
           <div className="relative aspect-[16/8] overflow-hidden rounded-[32px] shadow-2xl">
-            <Image src="/images/live.jpg" alt="The IClangues team" fill className="object-cover" sizes="100vw" priority />
+            <Image src="/images/story.jpg" alt="An IClangues session — learning the way locals speak" fill className="object-cover object-center" sizes="100vw" priority />
           </div>
         </Reveal>
       </section>
@@ -45,14 +46,17 @@ export default function AboutPage() {
       <section className="container grid items-center gap-12 py-20 lg:grid-cols-2">
         <Reveal>
           <h2 className="font-display text-3xl font-bold sm:text-4xl">Language is connection. We teach the connection.</h2>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <p className="text-lg text-muted-foreground">
+          <p className="mt-5 text-lg text-muted-foreground">
             At IClangues we don&rsquo;t just deliver lessons — we share a way of speaking, listening and being. Founded in
             Cabo Verde, our team of native-speaking teachers brings together five languages we love: Kriolu, Português,
             English, Français and Español. Whether you&rsquo;re an expat learning to chat with neighbours or a professional
             preparing for global work, we meet you where you are.
           </p>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-xl">
+            <Image src="/images/live.jpg" alt="A live IClangues lesson" fill className="object-cover" sizes="(max-width:1024px) 90vw, 560px" />
+          </div>
         </Reveal>
       </section>
 

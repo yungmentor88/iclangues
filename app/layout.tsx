@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Bricolage_Grotesque } from "next/font/google";
+import { Outfit, Fraunces } from "next/font/google";
 import "./globals.css";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { getUser } from "@/lib/supabase/server";
 
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap" });
-const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
   title: "IClangues — Learn Languages with Native Speakers | Cabo Verde",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
   return (
-    <html lang="en" className={`${jakarta.variable} ${bricolage.variable}`}>
+    <html lang="en" className={`${outfit.variable} ${fraunces.variable}`}>
       <body className="font-sans">
         <SmoothScroll />
         <SiteNav userEmail={user?.email ?? null} />

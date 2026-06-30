@@ -5,28 +5,10 @@ import { Hero } from "@/components/hero";
 import { Reveal } from "@/components/reveal";
 import { Faq } from "@/components/faq";
 import { FeatureHighlight } from "@/components/ui/feature-highlight";
-import { ZoomParallax } from "@/components/ui/zoom-parallax";
 import { Button } from "@/components/ui/button";
 import { LANGUAGES, FAQ, type LangCode } from "@/lib/content";
 
 const MARQUEE = ["Kriolu", "English", "Français", "Español", "Português", "Morabeza"];
-
-const STATS = [
-  { value: "1,200+", label: "Active learners" },
-  { value: "25+",    label: "Native teachers" },
-  { value: "5",      label: "Languages taught" },
-  { value: "A1–C2",  label: "All CEFR levels" },
-];
-
-const GALLERY = [
-  { src: "/images/hero.jpg",   alt: "Language learning in Cabo Verde" },
-  { src: "/images/market.jpg", alt: "The vibrant streets of Cabo Verde" },
-  { src: "/images/about.jpg",  alt: "IClangues classroom session" },
-  { src: "/images/beach.jpg",  alt: "Joy and community on the islands" },
-  { src: "/images/live.jpg",   alt: "A live lesson with a native teacher" },
-  { src: "/images/card1.jpg",  alt: "Students in conversation" },
-  { src: "/images/card2.jpg",  alt: "Cultural immersion" },
-];
 
 const SMART = [
   { icon: Users,          tone: "bg-primary/15 text-primary",      tag: "Real voices",         title: "Native speakers only",  text: "Every teacher lives the language they teach." },
@@ -41,37 +23,7 @@ export default function HomePage() {
       {/* ── 1. Hero ── */}
       <Hero />
 
-      {/* ── 2. Stats bar ── */}
-      <section className="border-b border-border bg-card">
-        <div className="container grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
-          {STATS.map((s, i) => (
-            <Reveal key={s.label} delay={i * 0.07} className="flex flex-col items-center justify-center py-10 text-center">
-              <span className="font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{s.value}</span>
-              <span className="mt-1.5 text-sm font-medium text-muted-foreground">{s.label}</span>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 3. Culture gallery — ZoomParallax ── */}
-      <section>
-        <div className="container py-20 text-center sm:py-24">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
-              <span className="h-2 w-2 rounded-full bg-primary" /> Cabo Verde · Culture · Language
-            </span>
-            <h2 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-              Feel the islands.<br />Speak the language.
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-              Scroll through the world you&rsquo;re stepping into.
-            </p>
-          </Reveal>
-        </div>
-        <ZoomParallax images={GALLERY} />
-      </section>
-
-      {/* ── 4. Manifesto ── */}
+      {/* ── 2. Manifesto ── */}
       <section className="container py-24 sm:py-32">
         <Reveal className="mx-auto max-w-4xl text-center">
           <p className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-[3.75rem]">
@@ -130,7 +82,7 @@ export default function HomePage() {
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
               <span className="h-2 w-2 rounded-full bg-primary" /> What you can learn
             </span>
-            <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">Five languages, one island spirit</h2>
+            <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">Learn up to five languages. Connect with the world.</h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Each taught by someone who lives it — with the slang, the rhythm and the warmth of real Cape Verdean hospitality.
             </p>
@@ -199,8 +151,13 @@ export default function HomePage() {
               </ul>
               <Button asChild variant="green" className="mt-7"><Link href="/contact">Book a free trial <ArrowRight className="h-4 w-4" /></Link></Button>
             </div>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
-              <Image src="/images/beach.jpg" alt="Joy and community in Cabo Verde" fill className="object-cover object-top" sizes="(max-width:1024px) 90vw, 520px" />
+            <div className="grid grid-rows-[auto_1fr] gap-3">
+              <div className="relative aspect-[16/7] overflow-hidden rounded-2xl">
+                <Image src="/images/card1.jpg" alt="IClangues students in conversation" fill className="object-cover" sizes="(max-width:1024px) 90vw, 520px" />
+              </div>
+              <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
+                <Image src="/images/beach.jpg" alt="Joy and community in Cabo Verde" fill className="object-cover object-top" sizes="(max-width:1024px) 90vw, 520px" />
+              </div>
             </div>
           </div>
         </Reveal>
