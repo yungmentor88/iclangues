@@ -96,7 +96,7 @@ export default function HomePage() {
       <section className="container grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-2">
         <Reveal className="order-2 lg:order-1">
           <div className="relative aspect-[4/3.4] overflow-hidden rounded-[28px] shadow-2xl">
-            <Image src="/images/story.jpg" alt="An IClangues mentoring session" fill className="object-cover object-top" sizes="(max-width:1024px) 90vw, 560px" />
+            <Image src="/images/market.jpg" alt="The vibrant streets and culture of Cabo Verde" fill className="object-cover object-center" sizes="(max-width:1024px) 90vw, 560px" />
           </div>
         </Reveal>
         <FeatureHighlight
@@ -137,7 +137,7 @@ export default function HomePage() {
               <Button asChild variant="green" className="mt-7"><Link href="/contact">Book a free trial <ArrowRight className="h-4 w-4" /></Link></Button>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
-              <Image src="/images/live.jpg" alt="A live IClangues lesson" fill className="object-cover" sizes="(max-width:1024px) 90vw, 520px" />
+              <Image src="/images/beach.jpg" alt="Joy and community in Cabo Verde" fill className="object-cover object-top" sizes="(max-width:1024px) 90vw, 520px" />
             </div>
           </div>
         </Reveal>
