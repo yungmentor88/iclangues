@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    /* ── Warm cream palette ── */
-    --background:       40 30% 97%;   /* #FAF9F6 — soft warm cream          */
-    --foreground:       215 28% 17%;  /* #1F2937 — rich near-black           */
+    /* ── Rich warm cream palette ── */
+    --background:       40 33% 90%;   /* #EEE7D9 — deep warm cream (rich)    */
+    --foreground:       215 28% 16%;  /* #1F2937 — rich near-black           */
 
-    --card:             38 40% 99%;   /* near-white with warmth              */
-    --card-foreground:  215 28% 17%;
+    --card:             42 50% 97%;   /* warm near-white — cards lift up     */
+    --card-foreground:  215 28% 16%;
 
-    --popover:          38 40% 99%;
-    --popover-foreground: 215 28% 17%;
+    --popover:          42 50% 98%;
+    --popover-foreground: 215 28% 16%;
 
     --primary:          162 83% 42%;  /* brand green                         */
     --primary-foreground: 162 60% 7%;
 
-    --secondary:        40 25% 93%;   /* warm light sand                     */
-    --secondary-foreground: 215 28% 17%;
+    --secondary:        40 28% 87%;   /* warm sand                           */
+    --secondary-foreground: 215 28% 16%;
 
-    --muted:            40 20% 93%;   /* warm muted bg                       */
-    --muted-foreground: 215 10% 45%;  /* warm medium gray                    */
+    --muted:            40 26% 86%;   /* warm muted bg                       */
+    --muted-foreground: 215 12% 40%;  /* warm medium gray                    */
 
-    --accent:           40 30% 91%;
-    --accent-foreground: 215 28% 17%;
+    --accent:           40 32% 85%;
+    --accent-foreground: 215 28% 16%;
 
     --destructive:      6 84% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border:           35 18% 88%;   /* warm parchment border               */
-    --input:            35 18% 88%;
+    --border:           38 24% 81%;   /* warm parchment border               */
+    --input:            38 24% 81%;
     --ring:             162 83% 42%;
     --radius:           0.9rem;
   }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { LanguageProvider } from "@/lib/i18n";
 import { getUser } from "@/lib/supabase/server";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
@@ -26,10 +27,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${outfit.variable} ${fraunces.variable}`}>
       <body className="font-sans">
-        <SmoothScroll />
-        <SiteNav userEmail={user?.email ?? null} />
-        {children}
-        <SiteFooter />
+        <LanguageProvider>
+          <SmoothScroll />
+          <SiteNav userEmail={user?.email ?? null} />
+          {children}
+          <SiteFooter />
+        </LanguageProvider>
       </body>
     </html>
   );

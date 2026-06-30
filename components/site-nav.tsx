@@ -7,33 +7,19 @@ import { usePathname } from "next/navigation";
 import { Globe, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useI18n, LANG_NAMES, LANG_LABEL, LANGS, type Lang } from "@/lib/i18n";
 
 const NAV = [
-  { href: "/about", key: "about" },
-  { href: "/contact", key: "contact" },
+  { href: "/about", key: "nav.about" },
+  { href: "/contact", key: "nav.contact" },
 ] as const;
-
-const T: Record<string, Record<string, string>> = {
-  en: { about: "About", contact: "Contact", book: "Book a Class", label: "EN" },
-  pt: { about: "Sobre", contact: "Contacto", book: "Marcar Aula", label: "PT" },
-  fr: { about: "À propos", contact: "Contact", book: "Réserver", label: "FR" },
-  es: { about: "Nosotros", contact: "Contacto", book: "Reservar", label: "ES" },
-  kr: { about: "Sobri", contact: "Kontaktu", book: "Marka Aula", label: "KR" },
-};
-const LANG_NAMES: Record<string, string> = {
-  en: "🇬🇧 English",
-  pt: "🇵🇹 Português",
-  fr: "🇫🇷 Français",
-  es: "🇪🇸 Español",
-  kr: "🇨🇻 Kriolu",
-};
 
 export function SiteNav({ userEmail }: { userEmail: string | null }) {
   const pathname = usePathname();
+  const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const [lang, setLang] = useState("en");
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,13 +27,6 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("icl-lang");
-      if (saved && T[saved]) setLang(saved);
-    } catch {}
   }, []);
 
   /* Close lang dropdown when clicking outside */
@@ -67,11 +46,9 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
     };
   }, [langOpen]);
 
-  const t = (k: string) => T[lang]?.[k] ?? T.en[k];
-  const pickLang = (l: string) => {
+  const pickLang = (l: Lang) => {
     setLang(l);
     setLangOpen(false);
-    try { localStorage.setItem("icl-lang", l); } catch {}
   };
 
   const onHero = !scrolled && pathname === "/";
@@ -114,6 +91,7 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
             </Link>
           ))}
         </nav>
+        {/* nav keys resolve via i18n: nav.about / nav.contact */}
 
         {/* Desktop right */}
         <div className="hidden items-center gap-3 md:flex">
@@ -133,7 +111,7 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
               aria-label="Choose language"
             >
               <Globe className="h-4 w-4 text-primary" />
-              <span>{T[lang].label}</span>
+              <span>{LANG_LABEL[lang]}</span>
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", langOpen && "rotate-180")} />
             </button>
 
@@ -144,7 +122,7 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
                 aria-label="Language options"
                 className="absolute right-0 top-[calc(100%+10px)] z-[60] min-w-[188px] rounded-2xl border border-border bg-white p-1.5 shadow-2xl"
               >
-                {Object.entries(LANG_NAMES).map(([code, name]) => (
+                {LANGS.map((code) => (
                   <button
                     key={code}
                     role="option"
@@ -155,7 +133,7 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
                       code === lang && "font-semibold text-primary bg-primary/5"
                     )}
                   >
-                    {name}
+                    {LANG_NAMES[code]}
                     {code === lang && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
                   </button>
                 ))}
@@ -164,7 +142,7 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
           </div>
 
           <Button asChild variant={onHero ? "white" : "default"} size="sm">
-            <Link href="/contact">{t("book")}</Link>
+            <Link href="/contact">{t("nav.book")}</Link>
           </Button>
         </div>
 
@@ -196,14 +174,14 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
           ))}
           <div className="mt-6">
             <Button asChild variant="default" className="w-full">
-              <Link href="/contact" onClick={() => setMenuOpen(false)}>{t("book")}</Link>
+              <Link href="/contact" onClick={() => setMenuOpen(false)}>{t("nav.book")}</Link>
             </Button>
           </div>
           {/* Language pills in mobile */}
           <div className="mt-6">
-            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Language</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("nav.language")}</p>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(LANG_NAMES).map(([code, name]) => (
+              {LANGS.map((code) => (
                 <button
                   key={code}
                   onClick={() => pickLang(code)}
@@ -214,7 +192,7 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
                       : "border-border text-muted-foreground hover:border-primary hover:text-primary"
                   )}
                 >
-                  {name}
+                  {LANG_NAMES[code]}
                 </button>
               ))}
             </div>

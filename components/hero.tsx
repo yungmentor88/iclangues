@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 
 const SLIDES = [
   { src: "/images/hero.jpg",   alt: "Learn languages with native speakers in Cabo Verde" },
@@ -20,6 +21,7 @@ const stagger = (i: number) => ({
 });
 
 export function Hero() {
+  const { t } = useI18n();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -72,31 +74,30 @@ export function Hero() {
                 <i key={i} className={`${i > 0 ? "-ml-1.5" : ""} h-4 w-4 rounded-full border-2 border-white/30`} style={{ background: c }} />
               ))}
             </span>
-            Born in Cabo Verde · taught worldwide
+            {t("hero.badge")}
           </motion.span>
 
           {/* Headline */}
           <motion.h1 {...stagger(1)} className="mt-6 font-display text-5xl font-bold leading-[1.03] tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5.25rem]">
-            Speak a language<br />
-            the way <span className="text-primary">natives do.</span>
+            {t("hero.title1")}<br />
+            {t("hero.title2")} <span className="text-primary">{t("hero.title3")}</span>
           </motion.h1>
 
           {/* Subheading */}
           <motion.p {...stagger(2)} className="mt-5 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
-            Real conversation, real culture — not grammar drills. Master Kriolu, English, French,
-            Spanish or Portuguese with teachers who live the language.
+            {t("hero.sub")}
           </motion.p>
 
           {/* CTAs */}
           <motion.div {...stagger(3)} className="mt-8 flex flex-wrap gap-3">
             <motion.div whileHover={{ scale: 1.03, boxShadow: "0 0 28px rgba(18,197,142,0.45)" }} whileTap={{ scale: 0.97 }} className="rounded-full">
               <Button asChild variant="green" size="lg" className="rounded-full shadow-xl shadow-primary/30">
-                <Link href="/contact">Book a Class <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/contact">{t("hero.cta1")} <ArrowRight className="h-4 w-4" /></Link>
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-full">
               <Button asChild size="lg" className="rounded-full border-white/25 bg-white/10 text-white backdrop-blur-md hover:bg-white/20">
-                <Link href="/courses">Explore Courses</Link>
+                <Link href="/courses">{t("hero.cta2")}</Link>
               </Button>
             </motion.div>
           </motion.div>
@@ -114,7 +115,7 @@ export function Hero() {
               <div className="flex gap-0.5 text-yellow-400">
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
               </div>
-              <span className="text-white/70">Loved by <b className="text-white">1,200+ learners</b> worldwide</span>
+              <span className="text-white/70">{t("hero.proof")}</span>
             </div>
           </motion.div>
         </div>
