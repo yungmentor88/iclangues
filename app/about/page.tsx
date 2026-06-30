@@ -55,7 +55,7 @@ export default function AboutPage() {
         </Reveal>
         <Reveal delay={0.1}>
           <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-xl">
-            <Image src="/images/live.jpg" alt="A live IClangues lesson" fill className="object-cover" sizes="(max-width:1024px) 90vw, 560px" />
+            <Image src="/images/about.jpg" alt="IClangues — language learning in Cabo Verde" fill className="object-cover" sizes="(max-width:1024px) 90vw, 560px" />
           </div>
         </Reveal>
       </section>
