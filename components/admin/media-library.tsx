@@ -7,6 +7,7 @@ import {
   Upload, Loader2, Check, CircleAlert, Trash2, Search, X, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { compressImage, formatBytes } from "@/lib/image-compress";
 import { uploadMedia, updateMediaMeta, deleteMedia } from "@/app/admin/actions";
 
 export interface MediaItem {
@@ -23,12 +24,6 @@ export interface MediaItem {
 const LANGS = ["en", "pt", "fr", "es", "kr"] as const;
 
 type Notice = { kind: "ok" | "error"; message: string } | null;
-
-function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1048576).toFixed(1)} MB`;
-}
 
 export function MediaLibrary({
   items,
@@ -50,7 +45,15 @@ export function MediaLibrary({
     setNotice(null);
 
     startTransition(async () => {
-      for (const file of Array.from(files)) {
+      let savedBytes = 0;
+
+      for (const original of Array.from(files)) {
+        // Resize and re-encode before upload. This keeps the bucket small and
+        // means files arrive well under the server-action body limit. Falls
+        // back to the original file if compression isn't possible.
+        const { file, originalBytes, compressed } = await compressImage(original);
+        if (compressed) savedBytes += originalBytes - file.size;
+
         const fd = new FormData();
         fd.set("file", file);
 
@@ -68,7 +71,7 @@ export function MediaLibrary({
         if (!r) {
           setNotice({
             kind: "error",
-            message: `Couldn't upload ${file.name} (${(file.size / 1048576).toFixed(1)} MB). The file may be too large — try one under 10 MB.`,
+            message: `Couldn't upload ${file.name} (${formatBytes(file.size)}). The file may be too large — try one under 10 MB.`,
           });
           return;
         }
@@ -77,9 +80,13 @@ export function MediaLibrary({
           return;
         }
       }
+
       setNotice({
         kind: "ok",
-        message: `Uploaded ${files.length} file${files.length === 1 ? "" : "s"}.`,
+        message:
+          savedBytes > 0
+            ? `Uploaded ${files.length} file${files.length === 1 ? "" : "s"} — optimised, saving ${formatBytes(savedBytes)}.`
+            : `Uploaded ${files.length} file${files.length === 1 ? "" : "s"}.`,
       });
       router.refresh();
     });
@@ -116,6 +123,10 @@ export function MediaLibrary({
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
           JPG, PNG, WebP, AVIF, GIF, SVG or PDF · up to 10 MB each
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Large photos are resized and optimised automatically — upload straight from your camera
+          or phone.
         </p>
         <button
           onClick={() => fileInput.current?.click()}
@@ -200,7 +211,7 @@ export function MediaLibrary({
               <span className="block p-3">
                 <span className="block truncate text-sm font-medium">{item.filename}</span>
                 <span className="block text-xs text-muted-foreground">
-                  {formatSize(item.size_bytes)}
+                  {formatBytes(item.size_bytes)}
                 </span>
               </span>
             </button>
@@ -303,7 +314,7 @@ function DetailModal({
 
         <p className="truncate text-sm font-semibold">{item.filename}</p>
         <p className="mb-4 text-xs text-muted-foreground">
-          {formatSize(item.size_bytes)} · {item.mime_type} · added{" "}
+          {formatBytes(item.size_bytes)} · {item.mime_type} · added{" "}
           {new Date(item.created_at).toLocaleDateString()}
         </p>
 
