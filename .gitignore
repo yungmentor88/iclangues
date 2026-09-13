@@ -19,3 +19,7 @@ next-env.d.ts
 # Local tooling config — not part of the app.
 .claude/settings.local.json
 /.gemini
+
+# Jolli Memory runtime state (debug logs, worker locks, capture queue,
+# machine-absolute paths). Regenerated locally; never shared.
+/.jolli
