@@ -183,6 +183,157 @@ export async function saveSectionValue(
   }
 }
 
+/* ──────────────────────────── Media library ──────────────────────────── */
+
+const ALLOWED_MIME = new Set([
+  "image/jpeg", "image/png", "image/webp", "image/avif",
+  "image/gif", "image/svg+xml", "application/pdf",
+]);
+const MAX_BYTES = 10 * 1024 * 1024; // must match the bucket's file_size_limit
+
+/** Public URL for a stored object. */
+export async function mediaPublicUrl(storagePath: string): Promise<string> {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  return `${base}/storage/v1/object/public/media/${storagePath}`;
+}
+
+/**
+ * Upload one file into the media bucket and record it in the media table.
+ *
+ * Both writes happen in this one request so a Storage object can never end up
+ * orphaned with no row pointing at it.
+ */
+export async function uploadMedia(formData: FormData): Promise<ActionResult & { id?: string }> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Choose a file to upload." };
+  }
+
+  // Validate before touching storage (spec §21).
+  if (!ALLOWED_MIME.has(file.type)) {
+    return { ok: false, error: `${file.type || "That file type"} isn't allowed. Use JPG, PNG, WebP, AVIF, GIF, SVG or PDF.` };
+  }
+  if (file.size > MAX_BYTES) {
+    return { ok: false, error: `That file is ${(file.size / 1048576).toFixed(1)} MB. The limit is 10 MB — please resize it first.` };
+  }
+
+  // Keep the original name readable but make the stored path unique and safe.
+  const safeName = file.name
+    .toLowerCase()
+    .replace(/[^a-z0-9.\-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(-80);
+  const storagePath = `${Date.now()}-${safeName}`;
+
+  try {
+    const supabase = createClient();
+
+    const { error: uploadError } = await supabase.storage
+      .from("media")
+      .upload(storagePath, file, { contentType: file.type, upsert: false });
+
+    if (uploadError) {
+      return { ok: false, error: `Unable to upload image. ${uploadError.message}` };
+    }
+
+    const { data, error } = await supabase
+      .from("media")
+      .insert({
+        storage_path: storagePath,
+        filename: file.name,
+        mime_type: file.type,
+        size_bytes: file.size,
+        created_by: admin.id,
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      // Roll the object back so we don't leave a file with no record.
+      await supabase.storage.from("media").remove([storagePath]);
+      return { ok: false, error: `Unable to save that file. ${error.message}` };
+    }
+
+    revalidatePath("/admin/media");
+    return { ok: true, id: data?.id as string | undefined };
+  } catch {
+    return { ok: false, error: "Unable to upload image. Please try again." };
+  }
+}
+
+/** Update a media file's alt text (translatable) or description. */
+export async function updateMediaMeta(
+  id: string,
+  altText: Record<string, string>,
+  description: string
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  try {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("media")
+      .update({ alt_text: cleanI18n(altText), description: description.trim() || null })
+      .eq("id", id);
+
+    if (error) return { ok: false, error: `Your changes could not be saved. ${error.message}` };
+    revalidatePath("/admin/media");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Your changes could not be saved. Please try again." };
+  }
+}
+
+/**
+ * Delete a media file — but refuse if a page still uses it (spec §23).
+ * The caller sees exactly where it's used rather than a generic failure.
+ */
+export async function deleteMedia(id: string): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  try {
+    const supabase = createClient();
+
+    const { data: row } = await supabase
+      .from("media")
+      .select("storage_path")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (!row) return { ok: false, error: "That file no longer exists." };
+
+    const { data: usage } = await supabase.rpc("media_usage", { p_path: row.storage_path });
+
+    if (Array.isArray(usage) && usage.length > 0) {
+      const where = usage
+        .map((u: { page_slug: string; section_label: string }) => `${u.page_slug} → ${u.section_label}`)
+        .join(", ");
+      return {
+        ok: false,
+        error: `This image is still used on: ${where}. Replace it there before deleting.`,
+      };
+    }
+
+    const { error: storageError } = await supabase.storage
+      .from("media")
+      .remove([row.storage_path as string]);
+    if (storageError) return { ok: false, error: `Could not delete the file. ${storageError.message}` };
+
+    const { error } = await supabase.from("media").delete().eq("id", id);
+    if (error) return { ok: false, error: `Could not delete the record. ${error.message}` };
+
+    revalidatePath("/admin/media");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Could not delete that file. Please try again." };
+  }
+}
+
 /** Publish everything currently in draft. Returns how many items went live. */
 export async function publishAll(note?: string): Promise<ActionResult & { count?: number }> {
   const admin = await getAdminUser();
