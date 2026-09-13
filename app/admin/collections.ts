@@ -244,6 +244,81 @@ export async function deleteTeacher(id: string): Promise<ActionResult> {
   }
 }
 
+/* ────────────────────────────── Site settings ────────────────────────── */
+
+export interface SiteSettingsInput {
+  school_name: string;
+  contact_email: string;
+  contact_phone: string;
+  whatsapp_number: string;
+  address: Record<string, string>;
+  social_instagram: string;
+  social_facebook: string;
+  social_youtube: string;
+}
+
+/** Blank, or a full https:// address. A bare "instagram.com/x" would render
+ *  as a relative link and 404 on our own domain, so reject it explicitly. */
+function normaliseUrl(value: string, label: string): { value: string | null } | { error: string } {
+  const v = value.trim();
+  if (!v) return { value: null };
+  if (!/^https?:\/\/\S+$/i.test(v)) {
+    return { error: `${label} must be a full web address starting with https://` };
+  }
+  return { value: v };
+}
+
+export async function saveSiteSettings(input: SiteSettingsInput): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  if (!input.school_name.trim()) return { ok: false, error: "A school name is required." };
+
+  const email = input.contact_email.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: "That email address doesn't look right." };
+  }
+
+  const socials: Record<string, string | null> = {};
+  for (const [key, label] of [
+    ["social_instagram", "Instagram"],
+    ["social_facebook", "Facebook"],
+    ["social_youtube", "YouTube"],
+  ] as const) {
+    const result = normaliseUrl(input[key], label);
+    if ("error" in result) return { ok: false, error: result.error };
+    socials[key] = result.value;
+  }
+
+  // The footer builds a wa.me/ link from this, so a stray "+" or space would
+  // silently produce a broken link. Store digits only.
+  const whatsapp = input.whatsapp_number.replace(/\D/g, "");
+
+  try {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({
+        school_name: input.school_name.trim(),
+        contact_email: email || null,
+        contact_phone: input.contact_phone.trim() || null,
+        whatsapp_number: whatsapp || null,
+        address: cleanI18n(input.address),
+        ...socials,
+        updated_by: admin.id,
+      })
+      .eq("id", true);
+
+    if (error) return { ok: false, error: `Your changes could not be saved. ${error.message}` };
+
+    revalidatePath("/admin/settings");
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Your changes could not be saved. Please try again." };
+  }
+}
+
 /* ─────────────────────────────── Reorder ─────────────────────────────── */
 
 /** Move an item up or down within its collection (spec §11 "Reorder"). */
