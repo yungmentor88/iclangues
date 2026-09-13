@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 
 const SLIDES = [
-  { src: "/images/hero.jpg",   alt: "Learn languages with native speakers in Cabo Verde" },
-  { src: "/images/beach.jpg",  alt: "Joy, community and the spirit of the islands" },
-  { src: "/images/market.jpg", alt: "The vibrant culture of Cabo Verde" },
+  // `position` keeps each photo's subject in frame once `object-cover` crops it.
+  // header.jpg is a wide 2.56:1 banner whose faces sit near the top — without
+  // this they get cut in half on tall/portrait viewports.
+  { src: "/images/header.jpg", alt: "Learn languages with native speakers in Cabo Verde", position: "50% 22%" },
+  { src: "/images/beach.jpg",  alt: "Joy, community and the spirit of the islands",       position: "50% 25%" },
+  { src: "/images/market.jpg", alt: "The vibrant culture of Cabo Verde",                  position: "50% 50%" },
 ];
 
 const stagger = (i: number) => ({
@@ -53,6 +56,7 @@ export function Hero() {
               fill
               priority={i === 0}
               className="object-cover"
+              style={{ objectPosition: slide.position }}
               sizes="100vw"
             />
           </motion.div>

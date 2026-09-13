@@ -35,7 +35,9 @@ export function AboutContent() {
       <section className="container">
         <Reveal>
           <div className="relative aspect-[16/8] overflow-hidden rounded-[32px] shadow-2xl">
-            <Image src="/images/card3.jpg" alt="The IClangues community in Cabo Verde" fill className="object-cover object-center" sizes="100vw" priority />
+            {/* card3.jpg is a tall 1000x2564 portrait photo; the faces sit ~33% down,
+                so `object-center` would crop them out of this 16/8 banner. */}
+            <Image src="/images/card3.jpg" alt="The IClangues community in Cabo Verde" fill className="object-cover" style={{ objectPosition: "50% 33%" }} sizes="100vw" priority />
           </div>
         </Reveal>
       </section>
