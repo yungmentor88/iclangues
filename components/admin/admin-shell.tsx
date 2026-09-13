@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, FileText, GraduationCap, HelpCircle, Users2,
   Image as ImageIcon, Navigation, Search, Settings, LogOut,
-  Menu, X, ExternalLink,
+  Menu, X, ExternalLink, Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -26,7 +26,10 @@ import { createClient } from "@/lib/supabase/client";
 const NAV: { heading: string; items: { href: string; label: string; icon: typeof LayoutDashboard }[] }[] = [
   {
     heading: "Overview",
-    items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }],
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/publish", label: "Publish", icon: Rocket },
+    ],
   },
   {
     heading: "Website",
