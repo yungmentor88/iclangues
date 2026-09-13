@@ -117,6 +117,72 @@ export async function saveSectionImage(
   }
 }
 
+/**
+ * Save a value at a JSON path inside a section's draft content.
+ *
+ * Handles both a translated object ({en, pt, ...}) and a plain scalar such as
+ * a button link. Used for anything stored on the section itself rather than
+ * in ui_strings.
+ */
+export async function saveSectionValue(
+  sectionId: string,
+  path: string[],
+  value: Record<string, string> | string
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+  if (path.length === 0) return { ok: false, error: "Nothing to save." };
+
+  let toWrite: unknown;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    // Guard against links that would break navigation (spec §14).
+    const looksLikeLink = path[path.length - 1] === "href";
+    if (looksLikeLink && trimmed && !/^(\/|https?:\/\/|mailto:|tel:)/.test(trimmed)) {
+      return {
+        ok: false,
+        error: "Links must start with / for this site, or https:// for an external site.",
+      };
+    }
+    toWrite = trimmed;
+  } else {
+    const cleaned = cleanI18n(value);
+    if (!cleaned) return { ok: false, error: "English text is required — it is used as the fallback." };
+    toWrite = cleaned;
+  }
+
+  try {
+    const supabase = createClient();
+    const { data, error: readError } = await supabase
+      .from("page_sections")
+      .select("draft_content")
+      .eq("id", sectionId)
+      .maybeSingle();
+
+    if (readError || !data) return { ok: false, error: "Could not load that section." };
+
+    const content = structuredClone(data.draft_content ?? {}) as Record<string, unknown>;
+    let node: any = content;
+    for (let i = 0; i < path.length - 1; i++) {
+      if (node[path[i]] === undefined) return { ok: false, error: "That field no longer exists." };
+      node = node[path[i]];
+    }
+    node[path[path.length - 1]] = toWrite;
+
+    const { error } = await supabase
+      .from("page_sections")
+      .update({ draft_content: content, updated_by: admin.id })
+      .eq("id", sectionId);
+
+    if (error) return { ok: false, error: `Your changes could not be saved. ${error.message}` };
+
+    revalidatePath("/admin/pages");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Your changes could not be saved. Please try again." };
+  }
+}
+
 /** Publish everything currently in draft. Returns how many items went live. */
 export async function publishAll(note?: string): Promise<ActionResult & { count?: number }> {
   const admin = await getAdminUser();
