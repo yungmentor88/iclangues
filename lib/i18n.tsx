@@ -166,7 +166,22 @@ interface I18nValue {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+/**
+ * `overrides` are published strings from the CMS, keyed the same way as the
+ * static dictionary S: { "hero.title1": { en: "...", pt: "..." } }.
+ *
+ * Lookup order is per-KEY, not all-or-nothing: a key present in the CMS wins,
+ * anything missing falls back to S, and an unknown key falls back to itself.
+ * So a partial, empty or failed CMS response degrades to exactly the site we
+ * have today rather than blanking any text out.
+ */
+export function LanguageProvider({
+  children,
+  overrides,
+}: {
+  children: React.ReactNode;
+  overrides?: Record<string, Partial<Record<Lang, string>>> | null;
+}) {
   const [lang, setLangState] = useState<Lang>("en");
 
   useEffect(() => {
@@ -185,7 +200,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem("icl-lang", l); } catch {}
   }, []);
 
-  const t = useCallback((key: string) => S[key]?.[lang] ?? S[key]?.en ?? key, [lang]);
+  const t = useCallback(
+    (key: string) => {
+      const cms = overrides?.[key];
+      // Empty strings are treated as "not translated" so a blank CMS field
+      // falls through to English rather than rendering nothing.
+      const fromCms = cms?.[lang]?.trim() || cms?.en?.trim();
+      if (fromCms) return fromCms;
+      return S[key]?.[lang] ?? S[key]?.en ?? key;
+    },
+    [lang, overrides]
+  );
 
   return <I18nContext.Provider value={{ lang, setLang, t }}>{children}</I18nContext.Provider>;
 }

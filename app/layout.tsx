@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { LanguageProvider } from "@/lib/i18n";
 import { getUser } from "@/lib/supabase/server";
+import { getUiStrings } from "@/lib/cms";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", style: ["normal", "italic"] });
@@ -23,11 +24,14 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const user = await getUser();
+  // Both fail soft: getUiStrings() returns null if the CMS is unreachable or
+  // unmigrated, and the provider then falls back to the static dictionary.
+  const [user, uiStrings] = await Promise.all([getUser(), getUiStrings()]);
+
   return (
     <html lang="en" className={`${outfit.variable} ${fraunces.variable}`}>
       <body className="font-sans">
-        <LanguageProvider>
+        <LanguageProvider overrides={uiStrings}>
           <SmoothScroll />
           <SiteNav userEmail={user?.email ?? null} />
           {children}
