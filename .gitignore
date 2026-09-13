@@ -23,3 +23,8 @@ next-env.d.ts
 # Jolli Memory runtime state (debug logs, worker locks, capture queue,
 # machine-absolute paths). Regenerated locally; never shared.
 /.jolli
+
+# Local credential files. `.env*.local` above does not cover these names.
+/uptime.env
+*.env
+!.env.example
