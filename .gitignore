@@ -14,3 +14,8 @@ next-env.d.ts
 # Source photo originals (large camera files). Kept locally and optimised into
 # public/images/ before use — not served by the app, so not tracked here.
 /Media
+
+# Per-machine AI agent hooks written by `jolli enable` (Jolli Memory).
+# Local tooling config — not part of the app.
+.claude/settings.local.json
+/.gemini
