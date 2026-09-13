@@ -264,6 +264,41 @@ export async function uploadMedia(formData: FormData): Promise<ActionResult & { 
   }
 }
 
+/**
+ * Media list for the image picker in the page editor.
+ *
+ * Returns ready-to-use public URLs so the client never has to know the
+ * bucket name or how a storage path maps to a URL.
+ */
+export async function listMedia(): Promise<
+  ActionResult & { items?: { id: string; filename: string; url: string }[] }
+> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("media")
+      .select("id, filename, storage_path, mime_type")
+      .like("mime_type", "image/%")
+      .order("created_at", { ascending: false });
+
+    if (error) return { ok: false, error: `Could not load your media. ${error.message}` };
+
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    const items = (data ?? []).map((row) => ({
+      id: row.id as string,
+      filename: row.filename as string,
+      url: `${base}/storage/v1/object/public/media/${row.storage_path}`,
+    }));
+
+    return { ok: true, items };
+  } catch {
+    return { ok: false, error: "Could not load your media. Please try again." };
+  }
+}
+
 /** Update a media file's alt text (translatable) or description. */
 export async function updateMediaMeta(
   id: string,

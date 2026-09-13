@@ -5,7 +5,14 @@ import Image from "next/image";
 import { ChevronDown, Check, CircleAlert, Loader2, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { describeSection, collectImages, type EditorField } from "@/lib/section-fields";
-import { saveUiString, saveSectionValue } from "@/app/admin/actions";
+import { saveUiString, saveSectionValue, saveSectionImage, listMedia } from "@/app/admin/actions";
+
+/** One image the owner can pick from the media library. */
+interface MediaChoice {
+  id: string;
+  filename: string;
+  url: string;
+}
 
 /**
  * One collapsible section of a page, rendered as labelled fields.
@@ -93,7 +100,13 @@ export function SectionEditor({
           ))}
 
           {images.map((img) => (
-            <ImageField key={img.path.join(".")} label={img.label} src={img.src} />
+            <ImageField
+              key={img.path.join(".")}
+              sectionId={sectionId}
+              label={img.label}
+              src={img.src}
+              path={img.path}
+            />
           ))}
         </div>
       )}
@@ -226,15 +239,58 @@ function Field({
   );
 }
 
-/** Read-only image preview for now; replacing images needs the media library. */
-function ImageField({ label, src }: { label: string; src: string }) {
+/**
+ * Shows the image a section uses and lets the owner swap it for one from the
+ * media library — no filenames or paths to type (spec §8).
+ */
+function ImageField({
+  sectionId,
+  label,
+  src,
+  path,
+}: {
+  sectionId: string;
+  label: string;
+  src: string;
+  path: string[];
+}) {
+  const [current, setCurrent] = useState(src);
+  const [picking, setPicking] = useState(false);
+  const [choices, setChoices] = useState<MediaChoice[] | null>(null);
+  const [status, setStatus] = useState<Status>({ state: "idle" });
+  const [pending, startTransition] = useTransition();
+
+  function openPicker() {
+    setPicking(true);
+    if (choices === null) {
+      startTransition(async () => {
+        const r = await listMedia();
+        setChoices(r.items ?? []);
+      });
+    }
+  }
+
+  function choose(item: MediaChoice) {
+    setPicking(false);
+    setStatus({ state: "saving" });
+    startTransition(async () => {
+      const r = await saveSectionImage(sectionId, path, item.url);
+      if (r.ok) {
+        setCurrent(item.url);
+        setStatus({ state: "saved" });
+      } else {
+        setStatus({ state: "error", message: r.error ?? "Could not change the image." });
+      }
+    });
+  }
+
   return (
     <div>
       <p className="mb-1.5 text-sm font-semibold">{label}</p>
       <div className="flex items-center gap-3.5 rounded-xl border border-border bg-background p-3">
         <div className="relative h-16 w-24 flex-none overflow-hidden rounded-lg bg-muted">
-          {src ? (
-            <Image src={src} alt="" fill className="object-cover" sizes="96px" />
+          {current ? (
+            <Image src={current} alt="" fill className="object-cover" sizes="96px" />
           ) : (
             <span className="grid h-full place-items-center text-muted-foreground">
               <ImageIcon className="h-5 w-5" />
@@ -242,12 +298,81 @@ function ImageField({ label, src }: { label: string; src: string }) {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm text-muted-foreground">{src}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Replacing images needs the Media library — coming next.
-          </p>
+          <p className="truncate text-sm text-muted-foreground">{current}</p>
+          <button
+            onClick={openPicker}
+            disabled={pending}
+            className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary disabled:opacity-60"
+          >
+            <ImageIcon className="h-3.5 w-3.5" /> Replace image
+          </button>
         </div>
       </div>
+
+      <div className="mt-1 min-h-[1.25rem] text-xs">
+        {(status.state === "saving" || pending) && (
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+          </span>
+        )}
+        {status.state === "saved" && !pending && (
+          <span className="flex items-center gap-1 text-primary">
+            <Check className="h-3 w-3" /> Saved as draft
+          </span>
+        )}
+        {status.state === "error" && (
+          <span className="flex items-center gap-1 text-destructive">
+            <CircleAlert className="h-3 w-3" /> {status.message}
+          </span>
+        )}
+      </div>
+
+      {picking && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
+          onClick={() => setPicking(false)}
+        >
+          <div
+            className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[22px] border border-border bg-card p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-4 font-display text-xl font-bold">Choose an image</h3>
+
+            {choices === null ? (
+              <p className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading your media…
+              </p>
+            ) : choices.length === 0 ? (
+              <p className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted-foreground">
+                No images uploaded yet. Go to <strong>Media</strong> in the sidebar to upload some,
+                then come back here.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {choices.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => choose(c)}
+                    className="overflow-hidden rounded-xl border border-border bg-background text-left transition hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+                  >
+                    <span className="relative block aspect-[4/3] bg-muted">
+                      <Image src={c.url} alt={c.filename} fill className="object-cover" sizes="200px" />
+                    </span>
+                    <span className="block truncate p-2 text-xs">{c.filename}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => setPicking(false)}
+              className="mt-4 rounded-full border border-border px-4 py-2 text-sm font-medium transition hover:border-foreground"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
