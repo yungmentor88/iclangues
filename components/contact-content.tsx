@@ -4,9 +4,22 @@ import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { ContactForm } from "@/components/contact-form";
 import { useI18n } from "@/lib/i18n";
+import type { SiteSettings } from "@/lib/cms";
 
-export function ContactContent() {
-  const { t } = useI18n();
+/** Fallbacks are the values hard-coded here before the CMS existed, so a
+ *  missing settings row renders exactly today's contact page. */
+const FALLBACK_EMAIL = "iclangues@outlook.com";
+const FALLBACK_PHONE = "+238 952 1329";
+const FALLBACK_WHATSAPP = "2389521329";
+
+export function ContactContent({ settings }: { settings?: SiteSettings | null }) {
+  const { t, lang } = useI18n();
+
+  const email = settings?.contact_email?.trim() || FALLBACK_EMAIL;
+  const phone = settings?.contact_phone?.trim() || FALLBACK_PHONE;
+  const whatsapp = settings?.whatsapp_number?.trim() || FALLBACK_WHATSAPP;
+  const location =
+    settings?.address?.[lang]?.trim() || settings?.address?.en?.trim() || t("foot.location");
 
   return (
     <main className="pb-24">
@@ -24,13 +37,13 @@ export function ContactContent() {
 
       <section className="container grid gap-10 lg:grid-cols-[0.85fr_1.15fr]">
         <Reveal className="space-y-3.5">
-          <ContactCard icon={<Mail className="h-5 w-5" />} tone="bg-primary/10 text-primary" label={t("contact.email")} value={<a href="mailto:iclangues@outlook.com">iclangues@outlook.com</a>} />
-          <ContactCard icon={<Phone className="h-5 w-5" />} tone="bg-red-50 text-brand-red" label={t("contact.phone")} value={<a href="tel:+2389521329">+238 952 1329</a>} />
-          <a href="https://wa.me/2389521329" target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 rounded-2xl bg-brand-ink p-5 text-white transition hover:-translate-y-0.5">
+          <ContactCard icon={<Mail className="h-5 w-5" />} tone="bg-primary/10 text-primary" label={t("contact.email")} value={<a href={`mailto:${email}`}>{email}</a>} />
+          <ContactCard icon={<Phone className="h-5 w-5" />} tone="bg-red-50 text-brand-red" label={t("contact.phone")} value={<a href={`tel:${phone.replace(/\s/g, "")}`}>{phone}</a>} />
+          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 rounded-2xl bg-brand-ink p-5 text-white transition hover:-translate-y-0.5">
             <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-primary text-brand-ink"><MessageCircle className="h-5 w-5" /></span>
             <span><span className="block text-xs font-bold uppercase tracking-wide text-primary">WhatsApp</span><span className="text-lg">{t("contact.whatsappMsg")}</span></span>
           </a>
-          <ContactCard icon={<MapPin className="h-5 w-5" />} tone="bg-blue-50 text-brand-ocean" label={t("contact.where")} value={t("foot.location")} />
+          <ContactCard icon={<MapPin className="h-5 w-5" />} tone="bg-blue-50 text-brand-ocean" label={t("contact.where")} value={location} />
         </Reveal>
 
         <Reveal delay={0.1}>

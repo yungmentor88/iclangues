@@ -4,9 +4,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Facebook, Youtube, Mail, Phone, MapPin } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import type { SiteSettings } from "@/lib/cms";
 
-export function SiteFooter() {
-  const { t } = useI18n();
+/** Fallbacks are the values that were hard-coded here before the CMS existed,
+ *  so a missing settings row renders exactly today's footer. */
+const FALLBACK_EMAIL = "iclangues@outlook.com";
+const FALLBACK_PHONE = "+238 952 1329";
+
+export function SiteFooter({ settings }: { settings?: SiteSettings | null }) {
+  const { t, lang } = useI18n();
+
+  const email = settings?.contact_email?.trim() || FALLBACK_EMAIL;
+  const phone = settings?.contact_phone?.trim() || FALLBACK_PHONE;
+  const location = settings?.address?.[lang]?.trim() || settings?.address?.en?.trim() || t("foot.location");
+
+  const socials = [
+    { Icon: Instagram, href: settings?.social_instagram?.trim() },
+    { Icon: Facebook, href: settings?.social_facebook?.trim() },
+    { Icon: Youtube, href: settings?.social_youtube?.trim() },
+  ];
 
   return (
     <footer className="bg-brand-ink text-white/70">
@@ -18,10 +34,14 @@ export function SiteFooter() {
             </div>
             <p className="max-w-sm text-sm text-white/60">{t("foot.tagline")}</p>
             <div className="mt-5 flex gap-3">
-              {[Instagram, Facebook, Youtube].map((Icon, i) => (
+              {/* Only render a social icon once a real URL is set, rather than
+                  linking to "#" and looking broken. */}
+              {socials.filter((s) => s.href).map(({ Icon, href }, i) => (
                 <a
                   key={i}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="grid h-10 w-10 place-items-center rounded-xl border border-white/15 text-white/60 transition hover:-translate-y-0.5 hover:border-primary hover:text-primary"
                   aria-label="Social link"
                 >
@@ -42,9 +62,9 @@ export function SiteFooter() {
           <div>
             <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-primary">{t("foot.touch")}</h4>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2.5"><Mail className="mt-0.5 h-4 w-4 flex-none text-primary" /><a href="mailto:iclangues@outlook.com" className="text-white/60 hover:text-white">iclangues@outlook.com</a></li>
-              <li className="flex items-start gap-2.5"><Phone className="mt-0.5 h-4 w-4 flex-none text-primary" /><a href="tel:+2389521329" className="text-white/60 hover:text-white">+238 952 1329</a></li>
-              <li className="flex items-start gap-2.5"><MapPin className="mt-0.5 h-4 w-4 flex-none text-primary" /><span className="text-white/60">{t("foot.location")}</span></li>
+              <li className="flex items-start gap-2.5"><Mail className="mt-0.5 h-4 w-4 flex-none text-primary" /><a href={`mailto:${email}`} className="text-white/60 hover:text-white">{email}</a></li>
+              <li className="flex items-start gap-2.5"><Phone className="mt-0.5 h-4 w-4 flex-none text-primary" /><a href={`tel:${phone.replace(/\s/g, "")}`} className="text-white/60 hover:text-white">{phone}</a></li>
+              <li className="flex items-start gap-2.5"><MapPin className="mt-0.5 h-4 w-4 flex-none text-primary" /><span className="text-white/60">{location}</span></li>
             </ul>
           </div>
         </div>
