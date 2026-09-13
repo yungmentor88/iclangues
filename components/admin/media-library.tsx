@@ -53,7 +53,25 @@ export function MediaLibrary({
       for (const file of Array.from(files)) {
         const fd = new FormData();
         fd.set("file", file);
-        const r = await uploadMedia(fd);
+
+        // A server action can fail to return at all — most commonly when the
+        // request body exceeds the platform limit, in which case the upload
+        // is rejected before our code runs. Guard against that rather than
+        // reading `.ok` of undefined and crashing the whole screen.
+        let r;
+        try {
+          r = await uploadMedia(fd);
+        } catch {
+          r = undefined;
+        }
+
+        if (!r) {
+          setNotice({
+            kind: "error",
+            message: `Couldn't upload ${file.name} (${(file.size / 1048576).toFixed(1)} MB). The file may be too large — try one under 10 MB.`,
+          });
+          return;
+        }
         if (!r.ok) {
           setNotice({ kind: "error", message: r.error ?? "Upload failed." });
           return;
