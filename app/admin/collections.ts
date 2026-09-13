@@ -319,6 +319,120 @@ export async function saveSiteSettings(input: SiteSettingsInput): Promise<Action
   }
 }
 
+/* ────────────────────────────── Navigation ───────────────────────────── */
+
+export interface NavInput {
+  menu: "header" | "footer";
+  label: Record<string, string>;
+  href: string;
+  is_external: boolean;
+  open_new_tab: boolean;
+  is_visible: boolean;
+  sort: number;
+}
+
+export async function saveNavItem(id: string | null, input: NavInput): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  const label = cleanI18n(input.label);
+  if (!label) return { ok: false, error: "An English menu label is required." };
+
+  const href = input.href.trim();
+  // Matches the nav_items_href_shape constraint in 0002. Checking here too
+  // means the owner gets a readable message instead of a database error.
+  if (input.is_external && !/^https?:\/\//i.test(href)) {
+    return { ok: false, error: "An external link must start with https://" };
+  }
+  if (!input.is_external && !href.startsWith("/")) {
+    return { ok: false, error: "A link on this site must start with / — for example /about" };
+  }
+
+  const row = {
+    menu: input.menu,
+    label,
+    href,
+    is_external: input.is_external,
+    open_new_tab: input.open_new_tab,
+    is_visible: input.is_visible,
+    sort: input.sort,
+  };
+
+  try {
+    const supabase = createClient();
+    const { error } = id
+      ? await supabase.from("nav_items").update(row).eq("id", id)
+      : await supabase.from("nav_items").insert(row);
+
+    if (error) return { ok: false, error: `Your changes could not be saved. ${error.message}` };
+
+    revalidatePath("/admin/navigation");
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Your changes could not be saved. Please try again." };
+  }
+}
+
+export async function deleteNavItem(id: string): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.from("nav_items").delete().eq("id", id);
+    if (error) return { ok: false, error: `Could not delete the link. ${error.message}` };
+
+    revalidatePath("/admin/navigation");
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Could not delete the link. Please try again." };
+  }
+}
+
+/** Move a nav link up or down within its own menu. */
+export async function reorderNavItem(
+  id: string,
+  direction: "up" | "down"
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "You are not signed in as an administrator." };
+
+  try {
+    const supabase = createClient();
+    const { data: row } = await supabase
+      .from("nav_items")
+      .select("id, menu, sort")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (!row) return { ok: false, error: "That link no longer exists." };
+
+    // Reorder within the same menu only — header and footer are separate lists.
+    const { data: siblings } = await supabase
+      .from("nav_items")
+      .select("id, sort")
+      .eq("menu", row.menu)
+      .order("sort", { ascending: true });
+
+    if (!siblings) return { ok: false, error: "Could not reorder right now." };
+
+    const index = siblings.findIndex((s) => s.id === id);
+    const swapWith = direction === "up" ? index - 1 : index + 1;
+    if (swapWith < 0 || swapWith >= siblings.length) return { ok: true };
+
+    await supabase.from("nav_items").update({ sort: swapWith }).eq("id", siblings[index].id);
+    await supabase.from("nav_items").update({ sort: index }).eq("id", siblings[swapWith].id);
+
+    revalidatePath("/admin/navigation");
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Could not reorder right now. Please try again." };
+  }
+}
+
 /* ─────────────────────────────── Reorder ─────────────────────────────── */
 
 /** Move an item up or down within its collection (spec §11 "Reorder"). */
