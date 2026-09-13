@@ -16,7 +16,7 @@ import { getAdminUser } from "@/lib/admin-auth";
  * user's typing (spec §25: never lose the administrator's work).
  */
 
-export interface ActionResult {
+interface ActionResult {
   ok: boolean;
   error?: string;
 }
@@ -190,12 +190,6 @@ const ALLOWED_MIME = new Set([
   "image/gif", "image/svg+xml", "application/pdf",
 ]);
 const MAX_BYTES = 10 * 1024 * 1024; // must match the bucket's file_size_limit
-
-/** Public URL for a stored object. */
-export async function mediaPublicUrl(storagePath: string): Promise<string> {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  return `${base}/storage/v1/object/public/media/${storagePath}`;
-}
 
 /**
  * Upload one file into the media bucket and record it in the media table.

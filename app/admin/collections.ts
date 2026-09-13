@@ -14,7 +14,7 @@ import { getAdminUser } from "@/lib/admin-auth";
  * thrown, so a failure never discards what was typed (§25).
  */
 
-export interface ActionResult {
+interface ActionResult {
   ok: boolean;
   error?: string;
 }
@@ -39,7 +39,7 @@ function refresh() {
 
 /* ─────────────────────────────── Courses ─────────────────────────────── */
 
-export interface CourseInput {
+interface CourseInput {
   lang: string;
   level: string;
   title: Record<string, string>;
@@ -140,7 +140,7 @@ export async function deleteCourse(id: string): Promise<ActionResult> {
 
 /* ───────────────────────────────── FAQs ──────────────────────────────── */
 
-export interface FaqInput {
+interface FaqInput {
   question: Record<string, string>;
   answer: Record<string, string>;
   is_published: boolean;
@@ -189,7 +189,7 @@ export async function deleteFaq(id: string): Promise<ActionResult> {
 
 /* ─────────────────────────────── Teachers ────────────────────────────── */
 
-export interface TeacherInput {
+interface TeacherInput {
   name: string;
   role: Record<string, string>;
   bio: Record<string, string>;
@@ -246,7 +246,7 @@ export async function deleteTeacher(id: string): Promise<ActionResult> {
 
 /* ────────────────────────────── Site settings ────────────────────────── */
 
-export interface SiteSettingsInput {
+interface SiteSettingsInput {
   school_name: string;
   contact_email: string;
   contact_phone: string;
@@ -321,7 +321,7 @@ export async function saveSiteSettings(input: SiteSettingsInput): Promise<Action
 
 /* ────────────────────────────── Navigation ───────────────────────────── */
 
-export interface NavInput {
+interface NavInput {
   menu: "header" | "footer";
   label: Record<string, string>;
   href: string;
