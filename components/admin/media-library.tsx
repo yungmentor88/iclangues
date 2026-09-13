@@ -49,10 +49,31 @@ export function MediaLibrary({
 
       for (const original of Array.from(files)) {
         // Resize and re-encode before upload. This keeps the bucket small and
-        // means files arrive well under the server-action body limit. Falls
-        // back to the original file if compression isn't possible.
-        const { file, originalBytes, compressed } = await compressImage(original);
+        // means files arrive well under the server-action body limit.
+        //
+        // compressImage is written never to throw, but if it somehow does,
+        // that rejection would take down the whole transition and surface as
+        // an opaque error. Guard it so a compression failure can only ever
+        // mean "upload the original", never "break the screen".
+        let file = original;
+        let originalBytes = original.size;
+        let compressed = false;
+        try {
+          const result = await compressImage(original);
+          file = result.file;
+          originalBytes = result.originalBytes;
+          compressed = result.compressed;
+        } catch {
+          /* keep the original file */
+        }
+
         if (compressed) savedBytes += originalBytes - file.size;
+
+        // Surfaced on failure below, so a problem reports real numbers rather
+        // than leaving us to infer what happened.
+        const sizeTrail = compressed
+          ? `${formatBytes(originalBytes)} → ${formatBytes(file.size)}`
+          : `${formatBytes(file.size)}, not compressed`;
 
         const fd = new FormData();
         fd.set("file", file);
@@ -71,12 +92,12 @@ export function MediaLibrary({
         if (!r) {
           setNotice({
             kind: "error",
-            message: `Couldn't upload ${file.name} (${formatBytes(file.size)}). The file may be too large — try one under 10 MB.`,
+            message: `Couldn't upload ${file.name} (${sizeTrail}). The server rejected the request before it was processed — usually because the file is still too large.`,
           });
           return;
         }
         if (!r.ok) {
-          setNotice({ kind: "error", message: r.error ?? "Upload failed." });
+          setNotice({ kind: "error", message: `${r.error ?? "Upload failed."} (${sizeTrail})` });
           return;
         }
       }
