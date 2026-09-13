@@ -23,6 +23,7 @@ const S: Record<string, Record<Lang, string>> = {
   "nav.language":{ en: "Language", pt: "Idioma", fr: "Langue", es: "Idioma", kr: "Língua" },
   "nav.login":   { en: "Log in", pt: "Entrar", fr: "Connexion", es: "Iniciar sesión", kr: "Entra" },
   "nav.account": { en: "Account", pt: "Conta", fr: "Mon compte", es: "Mi cuenta", kr: "Nha konta" },
+  "nav.signout": { en: "Sign out", pt: "Sair", fr: "Déconnexion", es: "Cerrar sesión", kr: "Sai" },
 
   // ---- Hero ----
   "hero.badge":  { en: "Born in Cabo Verde · taught worldwide", pt: "Nascido em Cabo Verde · ensinado em todo o mundo", fr: "Né au Cap-Vert · enseigné dans le monde entier", es: "Nacido en Cabo Verde · enseñado en todo el mundo", kr: "Nasidu na Kabu Verdi · insinadu na mundu interu" },

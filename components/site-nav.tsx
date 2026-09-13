@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Globe, ChevronDown, Menu, X, User } from "lucide-react";
+import { Globe, ChevronDown, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n, LANG_NAMES, LANG_LABEL, LANGS, type Lang } from "@/lib/i18n";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const NAV = [
   { href: "/about", key: "nav.about" },
@@ -50,6 +51,15 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
     setLang(l);
     setLangOpen(false);
   };
+
+  /** End the session. Full navigation so the server layout re-reads the user. */
+  async function signOut() {
+    try {
+      if (isSupabaseConfigured()) await createClient().auth.signOut();
+    } finally {
+      window.location.href = "/";
+    }
+  }
 
   const onHero = !scrolled && pathname === "/";
 
@@ -156,6 +166,23 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
             <span>{userEmail ? t("nav.account") : t("nav.login")}</span>
           </Link>
 
+          {/* Desktop sign-out — signed-in visitors previously had no way out. */}
+          {userEmail && (
+            <button
+              onClick={signOut}
+              title={t("nav.signout")}
+              aria-label={t("nav.signout")}
+              className={cn(
+                "grid h-9 w-9 place-items-center rounded-full border transition",
+                onHero
+                  ? "border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+                  : "border-border bg-card text-muted-foreground hover:border-destructive hover:text-destructive"
+              )}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          )}
+
           <Button asChild variant={onHero ? "white" : "default"} size="sm">
             <Link href="/contact">{t("nav.book")}</Link>
           </Button>
@@ -195,6 +222,15 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
             <User className="h-5 w-5 text-primary" />
             {userEmail ? t("nav.account") : t("nav.login")}
           </Link>
+          {userEmail && (
+            <button
+              onClick={() => { setMenuOpen(false); signOut(); }}
+              className="flex items-center gap-2.5 border-b border-border py-4 text-left font-display text-2xl text-muted-foreground transition hover:text-destructive"
+            >
+              <LogOut className="h-5 w-5" />
+              {t("nav.signout")}
+            </button>
+          )}
           <div className="mt-6">
             <Button asChild variant="default" className="w-full">
               <Link href="/contact" onClick={() => setMenuOpen(false)}>{t("nav.book")}</Link>

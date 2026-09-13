@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { GraduationCap, BookOpen, Award, ArrowRight } from "lucide-react";
 import { getUser } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export const metadata = { title: "My account — IClangues" };
 
@@ -44,6 +45,15 @@ export default async function AccountPage() {
           <Button asChild variant="green"><Link href="/courses">Browse courses <ArrowRight className="h-4 w-4" /></Link></Button>
           <Button asChild variant="outline"><Link href="/contact">Book a class</Link></Button>
         </div>
+      </div>
+
+      {/* Sign out — the public site previously offered no way to end a session. */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[22px] border border-border bg-card p-6">
+        <div>
+          <p className="font-semibold">Signed in as {user.email}</p>
+          <p className="text-sm text-muted-foreground">Sign out on this device.</p>
+        </div>
+        <SignOutButton />
       </div>
     </main>
   );

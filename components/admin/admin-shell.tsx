@@ -122,7 +122,9 @@ export function AdminShell({
         ))}
       </div>
 
-      <div className="space-y-2 border-t border-border pt-4">
+      {/* Pinned to the bottom of the sidebar: on a short viewport the nav list
+          above scrolls, but account + sign-out must always stay reachable. */}
+      <div className="sticky bottom-0 space-y-2 border-t border-border bg-card pb-1 pt-4">
         <a
           href="/"
           target="_blank"
