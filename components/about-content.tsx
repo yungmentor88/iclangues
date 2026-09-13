@@ -31,17 +31,6 @@ export function AboutContent() {
         </div>
       </section>
 
-      {/* Main banner image */}
-      <section className="container">
-        <Reveal>
-          <div className="relative aspect-[16/8] overflow-hidden rounded-[32px] shadow-2xl">
-            {/* card3.jpg is a tall 1000x2564 portrait photo; the faces sit ~33% down,
-                so `object-center` would crop them out of this 16/8 banner. */}
-            <Image src="/images/card3.jpg" alt="The IClangues community in Cabo Verde" fill className="object-cover" style={{ objectPosition: "50% 33%" }} sizes="100vw" priority />
-          </div>
-        </Reveal>
-      </section>
-
       <section className="container grid items-center gap-12 py-20 lg:grid-cols-2">
         <Reveal>
           <h2 className="font-display text-3xl font-bold sm:text-4xl">{t("about.h2")}</h2>
