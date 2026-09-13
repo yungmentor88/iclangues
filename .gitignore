@@ -28,3 +28,8 @@ next-env.d.ts
 /uptime.env
 *.env
 !.env.example
+
+# Locally downloaded CLI binaries (supabase.exe etc) and CLI scratch state.
+# ~131MB of executables — never belongs in the repo.
+/.tools
+/supabase/.temp
