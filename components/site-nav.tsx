@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Globe, ChevronDown, Menu, X } from "lucide-react";
+import { Globe, ChevronDown, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n, LANG_NAMES, LANG_LABEL, LANGS, type Lang } from "@/lib/i18n";
@@ -141,6 +141,21 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
             )}
           </div>
 
+          {/* Account: signed-out users get Log in, signed-in users get their dashboard. */}
+          <Link
+            href={userEmail ? "/account" : "/login"}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition",
+              onHero
+                ? "border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+                : "border-border bg-card text-foreground hover:border-primary"
+            )}
+            aria-label={userEmail ? "Your account" : "Log in"}
+          >
+            <User className="h-4 w-4 text-primary" />
+            <span>{userEmail ? t("nav.account") : t("nav.login")}</span>
+          </Link>
+
           <Button asChild variant={onHero ? "white" : "default"} size="sm">
             <Link href="/contact">{t("nav.book")}</Link>
           </Button>
@@ -172,6 +187,14 @@ export function SiteNav({ userEmail }: { userEmail: string | null }) {
               {t(item.key)}
             </Link>
           ))}
+          <Link
+            href={userEmail ? "/account" : "/login"}
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-2.5 border-b border-border py-4 font-display text-2xl text-foreground transition hover:text-primary"
+          >
+            <User className="h-5 w-5 text-primary" />
+            {userEmail ? t("nav.account") : t("nav.login")}
+          </Link>
           <div className="mt-6">
             <Button asChild variant="default" className="w-full">
               <Link href="/contact" onClick={() => setMenuOpen(false)}>{t("nav.book")}</Link>
