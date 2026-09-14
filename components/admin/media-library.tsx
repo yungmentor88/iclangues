@@ -277,24 +277,39 @@ function DetailModal({
 
   function save() {
     startTransition(async () => {
-      const r = await updateMediaMeta(item.id, alt, description);
-      if (r.ok) {
+      // A server action can fail to return at all. Reading .ok off undefined
+      // is what took down the whole screen during upload, so guard it here
+      // too rather than leaving the same trap in place.
+      let r;
+      try {
+        r = await updateMediaMeta(item.id, alt, description);
+      } catch {
+        r = undefined;
+      }
+
+      if (r?.ok) {
         onNotice({ kind: "ok", message: "Details saved." });
         onChanged();
       } else {
-        onNotice({ kind: "error", message: r.error ?? "Could not save." });
+        onNotice({ kind: "error", message: r?.error ?? "Could not save. Please try again." });
       }
     });
   }
 
   function remove() {
     startTransition(async () => {
-      const r = await deleteMedia(item.id);
-      if (r.ok) {
+      let r;
+      try {
+        r = await deleteMedia(item.id);
+      } catch {
+        r = undefined;
+      }
+
+      if (r?.ok) {
         onNotice({ kind: "ok", message: `Deleted ${item.filename}.` });
         onChanged();
       } else {
-        onNotice({ kind: "error", message: r.error ?? "Could not delete." });
+        onNotice({ kind: "error", message: r?.error ?? "Could not delete. Please try again." });
         onClose();
       }
     });
